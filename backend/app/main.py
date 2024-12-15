@@ -1,14 +1,17 @@
 from fastapi import FastAPI
 from routers import hello
+from app.routers import auth  # Import the auth router
 from app.exceptions import add_exception_handlers
 
 app = FastAPI()
 
 add_exception_handlers(app)  # Add global exception handler
 
-app.include_router(hello.router)  # Include the "hello" router
+# Include routers
+app.include_router(hello.router, tags=["Hello"])  # Include the "hello" router
+app.include_router(auth.router, tags=["Authentication"])  # Include the "auth" router
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 async def read_root():
     return {"message": "Welcome to the Agreement Repository API"}
 
