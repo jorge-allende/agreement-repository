@@ -1,10 +1,15 @@
-# Ignore Python
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.env
 
-# Ignore Node.js
+# Node.js
 node_modules/
 
-# Ignore Terraform
+# Docker
+*.env
+docker-compose.override.yml
+
+# Terraform
 .terraform/
 terraform.tfstate
