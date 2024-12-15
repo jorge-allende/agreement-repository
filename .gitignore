@@ -1,0 +1,10 @@
+# Ignore Python
+__pycache__/
+*.pyc
+
+# Ignore Node.js
+node_modules/
+
+# Ignore Terraform
+.terraform/
+terraform.tfstate
