@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import hello
+from app.routers import hello
 from app.routers import auth  # Import the auth router
 from app.exceptions import add_exception_handlers
 
