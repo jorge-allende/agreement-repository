@@ -21,7 +21,7 @@ const Dashboard = () => {
   }, [token]);
 
   return (
-    <div>
+    <div style={{ backgroundColor: "white", minHeight: "100vh", padding: "20px" }}>
       <h2>Dashboard</h2>
       <p>{message}</p>
     </div>

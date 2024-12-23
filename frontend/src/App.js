@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
-import APIDocs from "./components/APIDocs";
+import APIDocs from "./components/RapiDoc";
 
 function App() {
   return (
