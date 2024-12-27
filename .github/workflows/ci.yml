@@ -24,6 +24,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
+      - name: Set up environment variables
+        run: |
+          echo "LINKSQUARES_API_KEY=${{ secrets.LINKSQUARES_API_KEY }}" >> .env
+        env:
+          LINKSQUARES_API_KEY: ${{ secrets.LINKSQUARES_API_KEY }}
+
       - name: Run tests
         env:
           SECRET_KEY: "dev-placeholder-secret-key" # Provide SECRET_KEY
