@@ -1,0 +1,5134 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "LinkSquares API",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://api.linksquares.com/api"
+      }
+    ],
+    "paths": {
+      "/analyze/v1/agreements/{id}/attachments": {
+        "post": {
+          "summary": "accepts file name and responds with an upload url to be used to upload an attachment",
+          "tags": [
+            "Analyze Agreement Attachments"
+          ],
+          "description": "returns an AWS S3 url upon success for subsequent file upload. On Successful response, execute a PUT request to the AWS S3 URL with file.Example Documentation: https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "attachment_upload_url": "https://www.linksquares.com/example-upload-url"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "attachment_upload_url"
+                    ],
+                    "properties": {
+                      "attachment_upload_url": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "agreement not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Agreement Not Found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "could not create agreement attachment",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "file_name must have an extension matching .csv, .doc, .docx, .pdf, .txt, .xls, .xlsx or .asice",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "could not create s3 url",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Internal Server Error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file_name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "file_name"
+                  ]
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreements/{id}/tags": {
+        "get": {
+          "summary": "returns list of objects representing the agreement tags based on query parameters",
+          "tags": [
+            "Analyze Agreement Tags"
+          ],
+          "parameters": [
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify agreement type name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify cursor from previous response to get next page of data",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful without params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "page_size": 100,
+                    "count": 3,
+                    "next_cursor": null,
+                    "tags": [
+                      {
+                        "id": "119adae4-99ce-11ee-953c-ff38a726712e",
+                        "name": "blue tag"
+                      },
+                      {
+                        "id": "119ce55a-99ce-11ee-953c-0bc46a54e735",
+                        "name": "green tag"
+                      },
+                      {
+                        "id": "119d3122-99ce-11ee-953c-07af3d3fa623",
+                        "name": "yellow tag"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "page_size": {
+                        "type": "integer",
+                        "description": "The number of results displayed",
+                        "example": 100
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "next_cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid",
+                        "description": "The string that must be passed to the cursor parameter to get the next page of results",
+                        "readOnly": true
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the tag",
+                              "example": "07388d1f-d79b-4c4e-9e7a-679d9c5e5ecb"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "The name of the tag",
+                              "example": "Blue"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "page_size",
+                      "count",
+                      "next_cursor",
+                      "tags"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "cursor is invalid",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "cursor is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreements/{id}/terms": {
+        "get": {
+          "summary": "returns list of objects representing the agreement terms based on query parameters",
+          "tags": [
+            "Analyze Agreement Terms"
+          ],
+          "parameters": [
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify agreement type name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify cursor from previous response to get next page of data",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful without params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "page_size": 100,
+                    "count": 4,
+                    "next_cursor": null,
+                    "terms": [
+                      {
+                        "id": "133fd2c8-99ce-11ee-953c-a7b5eccd09ea",
+                        "name": "abc",
+                        "value": "a",
+                        "kind": "string",
+                        "status": "User-Defined"
+                      },
+                      {
+                        "id": "13432cfc-99ce-11ee-953c-5b2adbc77dec",
+                        "name": "bcd",
+                        "value": null,
+                        "kind": "list",
+                        "status": "User-Defined"
+                      },
+                      {
+                        "id": "13438aee-99ce-11ee-953c-f77631060336",
+                        "name": "cde",
+                        "value": "c",
+                        "kind": "string",
+                        "status": "User-Defined"
+                      },
+                      {
+                        "id": "13444862-99ce-11ee-953c-0b5ff35a1201",
+                        "name": "def",
+                        "value": "d",
+                        "kind": "string",
+                        "status": "User-Defined"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "page_size": {
+                        "type": "integer",
+                        "description": "The number of results displayed",
+                        "example": 100
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "next_cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid",
+                        "description": "The string that must be passed to the cursor parameter to get the next page of results",
+                        "readOnly": true
+                      },
+                      "terms": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the term",
+                              "example": "2e195378-8375-4021-9ac4-08c451ba3b5e"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "The name of the term",
+                              "example": "Effective Date"
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "The value of the term",
+                              "example": "2022-12-25",
+                              "nullable": true
+                            },
+                            "kind": {
+                              "type": "string",
+                              "description": "The kind of the term",
+                              "example": "Date"
+                            },
+                            "status": {
+                              "type": "string",
+                              "description": "The status of the term",
+                              "example": "User-Defined"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "page_size",
+                      "count",
+                      "next_cursor",
+                      "terms"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "cursor is invalid",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "cursor is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreements/{id}/terms/{term_id}": {
+        "get": {
+          "summary": "returns an object representing a single term",
+          "tags": [
+            "Analyze Agreement Terms"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "term_id",
+              "in": "path",
+              "description": "term id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "id": "14cd4d82-99ce-11ee-953c-bb4310d675f4",
+                    "name": "abc",
+                    "value": 123,
+                    "kind": "string",
+                    "status": "User-Defined"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "kind",
+                      "status"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "integer"
+                          }
+                        ]
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "term not found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreements/{id}": {
+        "get": {
+          "summary": "returns an object representing a single agreement",
+          "tags": [
+            "Analyze Agreements"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "id": "155efe1c-99ce-11ee-953c-8759ef22a0bf",
+                    "parent_agreement_id": "155b65ea-99ce-11ee-953c-437adad1036c",
+                    "finalize_agreement_id": "7ee3d775-a2c2-45bc-978a-d66260d9a500",
+                    "name": "Agreement1",
+                    "original_name": "original 1",
+                    "updated_date": "2023-12-13T10:41:29.591-05:00",
+                    "upload_date": "2023-12-13T10:41:29.591-05:00",
+                    "uploaded_by": "Everett Kling",
+                    "type": {
+                      "id": "1553f62a-99ce-11ee-953c-cff0eefa37bb",
+                      "name": "Master Agreement"
+                    },
+                    "tags": [
+                      {
+                        "id": "1555ea34-99ce-11ee-953c-6733bd8796a7",
+                        "name": "green"
+                      },
+                      {
+                        "id": "155636d8-99ce-11ee-953c-a7bd959a3bee",
+                        "name": "yellow"
+                      }
+                    ],
+                    "terms": [
+                      {
+                        "id": "15604b64-99ce-11ee-953c-93710f386b82",
+                        "value": "test term value",
+                        "name": "stt_1",
+                        "kind": "string",
+                        "status": "AI Inconclusive"
+                      },
+                      {
+                        "id": "1561aec8-99ce-11ee-953c-2b5b2c61d580",
+                        "value": "test term value 2",
+                        "name": "stt_2",
+                        "kind": "string",
+                        "status": "AI Not Present"
+                      }
+                    ],
+                    "child_agreements": [
+                      {
+                        "id": "157fdd12-99ce-11ee-953c-77fe46613ed5"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "original_name",
+                      "name",
+                      "type",
+                      "terms",
+                      "tags",
+                      "uploaded_by",
+                      "upload_date",
+                      "updated_date",
+                      "parent_agreement_id",
+                      "finalize_agreement_id",
+                      "child_agreements"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "id"
+                      },
+                      "original_name": {
+                        "type": "string",
+                        "description": "original file name"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "agreement name"
+                      },
+                      "type": {
+                        "type": "object",
+                        "description": "agreement type",
+                        "required": [
+                          "id",
+                          "name"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "type id"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "type name"
+                          }
+                        }
+                      },
+                      "terms": {
+                        "type": "array",
+                        "description": "agreement terms",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "description": "value"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "term type name"
+                            },
+                            "status": {
+                              "type": "string",
+                              "description": "status"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "description": "term type kind"
+                            }
+                          }
+                        }
+                      },
+                      "tags": {
+                        "type": "array",
+                        "description": "tags",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "name"
+                            }
+                          }
+                        }
+                      },
+                      "uploaded_by": {
+                        "type": "string",
+                        "description": "full name of uploading user"
+                      },
+                      "upload_date": {
+                        "type": "string",
+                        "description": "uploaded date"
+                      },
+                      "updated_date": {
+                        "type": "string",
+                        "description": "updated date"
+                      },
+                      "parent_agreement_id": {
+                        "type": "string",
+                        "description": "parent agreement id"
+                      },
+                      "finalize_agreement_id": {
+                        "type": "string",
+                        "description": "finalize agreement id"
+                      },
+                      "child_agreements": {
+                        "type": "array",
+                        "description": "child agreements",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "child agreement id"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No record found for id",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Record Not Found",
+                    "error_code": "not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "invalid id format",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "id is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreements/{id}/hierarchy": {
+        "get": {
+          "summary": "returns an object representing a hierarchy for a given agreement",
+          "tags": [
+            "Analyze Agreement Hierarchy"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "name": "Agreement2",
+                    "effective_date": "2021-09-23",
+                    "agreement_id": "1813c5c0-99ce-11ee-953c-a314bea94ade",
+                    "upload_date": "2023-12-13T10:41:34-05:00",
+                    "children": [
+                      {
+                        "name": "Agreement1",
+                        "effective_date": "2021-09-23",
+                        "agreement_id": "1816bd20-99ce-11ee-953c-ebb26004e2f5",
+                        "upload_date": "2023-12-13T10:41:34-05:00",
+                        "children": [
+                          {
+                            "name": "child agreement 1",
+                            "effective_date": "2021-09-23",
+                            "agreement_id": "18257a4a-99ce-11ee-953c-73b840423e63",
+                            "upload_date": "2023-12-13T10:41:34-05:00",
+                            "children": null
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Agreement Name (Parent)",
+                        "example": "Example Master Agreement"
+                      },
+                      "effective_date": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Effective Date of Agreement",
+                        "example": "2021-09-23"
+                      },
+                      "agreement_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUID of the Agreement"
+                      },
+                      "upload_date": {
+                        "type": "string",
+                        "description": "Upload Date of the Agreement",
+                        "example": "2022-10-23"
+                      },
+                      "children": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "Name of the Child Agreement",
+                              "example": "Example Child Agreement Name"
+                            },
+                            "effective_date": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "Effective Date of Child Agreement",
+                              "example": "2020-04-23"
+                            },
+                            "agreement_id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "description": "UUID of the Child Agreement"
+                            },
+                            "upload_date": {
+                              "type": "string",
+                              "description": "Upload Date of the Child Agreement",
+                              "example": "2022-03-23"
+                            },
+                            "children": {
+                              "type": "array",
+                              "nullable": true,
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Name of the Grandchild Agreement",
+                                    "example": "Example Child Agreement Name"
+                                  },
+                                  "effective_date": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Effective Date of Grandchild Agreement",
+                                    "example": "2021-01-23"
+                                  },
+                                  "agreement_id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "description": "UUID of the Grandchild Agreement"
+                                  },
+                                  "upload_date": {
+                                    "type": "string",
+                                    "description": "Upload Date of the Grandchild Agreement",
+                                    "example": "2022-12-23"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "effective_date",
+                      "agreement_id",
+                      "upload_date",
+                      "children"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No record found for id",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Record Not Found",
+                    "error_code": "not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "invalid id format",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "id is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreements": {
+        "get": {
+          "summary": "returns list of objects representing the agreements based on query parameters",
+          "tags": [
+            "Analyze Agreements"
+          ],
+          "parameters": [
+            {
+              "name": "type",
+              "in": "query",
+              "description": "Specify agreement type name to filter results by agreement type [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "tags",
+              "in": "query",
+              "description": "Specify comma separated tags to return agreements with all tags requested [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "after_date",
+              "in": "query",
+              "description": "Specify after_date which will return all agreements updated since date [YYYY-MM-DD]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name, updated_date, upload_date]. Prepend `-` for descending [-name, -updated_date, -upload_date]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify cursor from previous response to get next page of data",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "tags_delimiter",
+              "in": "query",
+              "description": "Specify a delimiter to separate tags, default is comma [,].  Acceptable delimiters [- ~ . _ ,]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "success",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "page_size": {
+                        "type": "integer",
+                        "description": "The number of results displayed",
+                        "example": 100
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "next_cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid",
+                        "description": "The string that must be passed to the cursor parameter to get the next page of results",
+                        "readOnly": true
+                      },
+                      "agreements": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the Agreement",
+                              "example": "b18d1e98-2d42-4f47-9b16-f172f179d466"
+                            },
+                            "parent_agreement_id": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "UUID of the Parent Agreement",
+                              "example": "30988d74-e9ce-4576-a9fa-de3d82216cbd"
+                            },
+                            "finalize_agreement_id": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "UUID of the Finalize Agreement",
+                              "example": "9d1e8071-6edc-414b-8313-ff6954c241f2"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "Agreement Name",
+                              "readOnly": true,
+                              "example": "Example Agreement Name"
+                            },
+                            "original_name": {
+                              "type": "string",
+                              "description": "Original File Name",
+                              "example": "Example Original File Name"
+                            },
+                            "updated_date": {
+                              "type": "string",
+                              "description": "Last Updated Date of Agreement",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            },
+                            "upload_date": {
+                              "type": "string",
+                              "description": "Upload Date of the Agreement",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            },
+                            "uploaded_by": {
+                              "type": "string",
+                              "description": "Name of User who Uploaded Agreement",
+                              "example": "John Doe"
+                            },
+                            "type": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "UUID of the Agreement Type",
+                                  "example": "c14f9448-ee16-49c9-8cee-c1e19fbb716e"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "Name of the Agreement Type",
+                                  "example": "Master Agreement"
+                                }
+                              }
+                            },
+                            "tags": {
+                              "type": "array",
+                              "nullable": true,
+                              "minItems": 0,
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "UUID of the tag",
+                                    "example": "3228b930-7434-47bd-8391-4a8f440a984d"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "description": "The name of the tag",
+                                    "example": "Blue"
+                                  }
+                                }
+                              }
+                            },
+                            "child_agreements": {
+                              "type": "array",
+                              "nullable": true,
+                              "minItems": 0,
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "description": "UUID of the Child Agreement",
+                                    "example": "9f998463-0efd-4714-96d0-f89660a99478"
+                                  }
+                                }
+                              }
+                            },
+                            "terms": {
+                              "type": "array",
+                              "nullable": true,
+                              "minItems": 0,
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "UUID of the term",
+                                    "example": "8d837980-f0cf-40fa-9b8e-a5257f09351f"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "description": "The name of the term",
+                                    "example": "Effective Date"
+                                  },
+                                  "value": {
+                                    "type": "string",
+                                    "description": "The value of the term",
+                                    "example": "2022-12-25",
+                                    "nullable": true
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "description": "The kind of the term",
+                                    "example": "Date"
+                                  },
+                                  "status": {
+                                    "type": "string",
+                                    "description": "The status of the term",
+                                    "example": "User-Defined"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "parent_agreement_id",
+                          "finalize_agreement_id",
+                          "name",
+                          "original_name",
+                          "updated_date",
+                          "upload_date",
+                          "uploaded_by",
+                          "type",
+                          "tags",
+                          "terms",
+                          "child_agreements"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "page_size",
+                      "count",
+                      "next_cursor",
+                      "agreements"
+                    ]
+                  },
+                  "example": {
+                    "page_size": 100,
+                    "count": 4,
+                    "next_cursor": null,
+                    "agreements": [
+                      {
+                        "id": "1afcb49a-99ce-11ee-953c-071e7d9f13da",
+                        "parent_agreement_id": "1af96ec0-99ce-11ee-953c-ab7b5f738aa5",
+                        "finalize_agreement_id": "83b58e20-f545-44a0-be23-1d69a63137ca",
+                        "name": "Agreement1",
+                        "original_name": "original 1",
+                        "updated_date": "2023-12-13T10:41:39.014-05:00",
+                        "upload_date": "2023-12-13T10:41:39.014-05:00",
+                        "uploaded_by": "Bertram Nienow",
+                        "type": {
+                          "id": "1af3b2dc-99ce-11ee-953c-171d3902ff4f",
+                          "name": "Master Agreement"
+                        },
+                        "tags": [
+                          {
+                            "id": "1af59566-99ce-11ee-953c-f3b82d58a611",
+                            "name": "green"
+                          },
+                          {
+                            "id": "1af5ddfa-99ce-11ee-953c-ef14c65c7f1f",
+                            "name": "yellow"
+                          }
+                        ],
+                        "terms": [
+                          {
+                            "id": "1afe0d9a-99ce-11ee-953c-ffe38767d8da",
+                            "value": "test term value",
+                            "name": "stt_1",
+                            "kind": "string",
+                            "status": "AI Inconclusive"
+                          },
+                          {
+                            "id": "1aff6500-99ce-11ee-953c-37d4743ecf24",
+                            "value": "test term value 2",
+                            "name": "stt_2",
+                            "kind": "string",
+                            "status": "AI Not Present"
+                          }
+                        ],
+                        "child_agreements": [
+                          {
+                            "id": "1b0b4a1e-99ce-11ee-953c-c37227e87e7b"
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1af96ec0-99ce-11ee-953c-ab7b5f738aa5",
+                        "parent_agreement_id": null,
+                        "finalize_agreement_id": "3e9c7bf2-6864-4949-897b-38fc51f786fb",
+                        "name": "Agreement2",
+                        "original_name": "original 2",
+                        "updated_date": "2023-12-13T10:41:38.992-05:00",
+                        "upload_date": "2023-12-13T10:41:38.992-05:00",
+                        "uploaded_by": "Chasity O'Keefe",
+                        "type": {
+                          "id": "1af55e34-99ce-11ee-953c-abc9ae47b22c",
+                          "name": "Assignment"
+                        },
+                        "tags": [
+                          {
+                            "id": "1af62274-99ce-11ee-953c-9328c2430ceb",
+                            "name": "blue"
+                          }
+                        ],
+                        "terms": null,
+                        "child_agreements": [
+                          {
+                            "id": "1afcb49a-99ce-11ee-953c-071e7d9f13da"
+                          }
+                        ]
+                      },
+                      {
+                        "id": "1b026f7a-99ce-11ee-953c-effad3892f3c",
+                        "parent_agreement_id": null,
+                        "finalize_agreement_id": "739fbe79-07df-4b11-a304-5281281a73e2",
+                        "name": "Agreement2 (1)",
+                        "original_name": "original 2",
+                        "updated_date": "2023-12-13T10:41:39.051-05:00",
+                        "upload_date": "2023-12-13T10:41:39.051-05:00",
+                        "uploaded_by": "Bob Pagac",
+                        "type": {
+                          "id": "1af55e34-99ce-11ee-953c-abc9ae47b22c",
+                          "name": "Assignment"
+                        },
+                        "tags": [
+                          {
+                            "id": "1af62274-99ce-11ee-953c-9328c2430ceb",
+                            "name": "blue"
+                          }
+                        ],
+                        "terms": [
+                          {
+                            "id": "1b036e98-99ce-11ee-953c-1378cd3332b9",
+                            "value": "1",
+                            "name": "stt_1",
+                            "kind": "string",
+                            "status": "AI Processing"
+                          },
+                          {
+                            "id": "1b04ab6e-99ce-11ee-953c-77c7d201e51f",
+                            "value": "custom",
+                            "name": "stt_2",
+                            "kind": "string",
+                            "status": "User-Defined"
+                          },
+                          {
+                            "id": "1b05d3ae-99ce-11ee-953c-bbee9b104f31",
+                            "value": "strong value",
+                            "name": "stt_3",
+                            "kind": "string",
+                            "status": "AI Present"
+                          }
+                        ],
+                        "child_agreements": null
+                      },
+                      {
+                        "id": "1b0b4a1e-99ce-11ee-953c-c37227e87e7b",
+                        "parent_agreement_id": "1afcb49a-99ce-11ee-953c-071e7d9f13da",
+                        "finalize_agreement_id": "3ede35c6-5055-412b-bdd1-b270ea85c68d",
+                        "name": "child agreement 1",
+                        "original_name": "child agreement 1",
+                        "updated_date": "2023-12-13T10:41:39.109-05:00",
+                        "upload_date": "2023-12-13T10:41:39.109-05:00",
+                        "uploaded_by": "Stephanie Mitchell",
+                        "type": {
+                          "id": "1af3b2dc-99ce-11ee-953c-171d3902ff4f",
+                          "name": "Master Agreement"
+                        },
+                        "tags": [],
+                        "terms": null,
+                        "child_agreements": null
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "wrong date format",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "after_date is in invalid format",
+                    "error_code": "unknown_error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        },
+        "post": {
+          "summary": "accepts file name and other meta data and responds with an upload url to be used to upload an agreement",
+          "tags": [
+            "Analyze Agreements"
+          ],
+          "description": "returns an AWS S3 url upon success for subsequent file upload. On Successful response, execute a PUT request to the AWS S3 URL with file.Example Documentation: https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "upload_id": "201c8f7c-99ce-11ee-953c-97701a3e0d23",
+                    "name": "custom name",
+                    "file_name": "new file name.pdf",
+                    "type": "Master Agreement",
+                    "status": "Initialized",
+                    "url": "https://linksquares-agreement-api-upload-test.s3.amazonaws.com/1fe52e1a-99ce-11ee-953c-dba873355db2/201c8f7c-99ce-11ee-953c-97701a3e0d23/new%20file%20name.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIARONR2CMFLKKDHMUC%2F20231213%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231213T154147Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Security-Token=unused-test-session-key&X-Amz-Signature=5cfbcab9a6b67d7eeceaeb3ed4ba86cfb75313896688db3eba5c1a660b747cd4",
+                    "tags": [
+                      "red",
+                      "blue"
+                    ],
+                    "terms": [
+                      {
+                        "name": "stt_1",
+                        "value": "value2"
+                      },
+                      {
+                        "name": "Warranty_56",
+                        "value": "1.5"
+                      },
+                      {
+                        "name": "stt_2",
+                        "value": "LinkSquares Ireland, Ltd St"
+                      }
+                    ],
+                    "parent_agreement_id": "1ff09598-99ce-11ee-953c-17331ab7c54c"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "upload_id": {
+                        "type": "string",
+                        "description": "UUID of the Upload",
+                        "example": "1636fd26-213b-4ea7-86d8-9aebd2204fde"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The custom name of the document being uploaded",
+                        "example": "Example Agreement Name"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "The Agreement Type of the Upload",
+                        "example": "Master Agreement"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "description": "The name of the file being uploaded",
+                        "example": "example_agreement_name.pdf"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "Status of the Upload",
+                        "example": "Initialized"
+                      },
+                      "url": {
+                        "type": "string",
+                        "description": "AWS Presigned Upload URL",
+                        "example": "https://linksquares-agreement-api-upload-test.s3.amazonaws.com/3f4f51c8-15d9-11ee-8c7f-1f7f5cacceef/4037a5e0-15d9-11ee-8c7f-9ffe3bde9219/new%20file%20name.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIARONR2CMFGDRHHB3F%2F20230628%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230628T172852Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Security-Token=unused-test-session-key&X-Amz-Signature=2d3739f49a682547d1f52c3ab0b32709ec39df9954b8a05e1abb2588414276cf"
+                      },
+                      "parent_agreement_id": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "UUID of the Parent Agreement",
+                        "example": "8782bbc6-59de-4b7b-a3c7-82e4b2b17170"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "string",
+                          "description": "Tag Name"
+                        }
+                      },
+                      "terms": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "The name of the term",
+                              "example": "Effective Date"
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "The value of the term",
+                              "example": "2022-12-25",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "upload_id",
+                      "name",
+                      "file_name",
+                      "type",
+                      "status",
+                      "url",
+                      "tags",
+                      "terms",
+                      "parent_agreement_id"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "invalid extension",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "file_name must have an extension matching [pdf, docx]",
+                    "error_code": "unknown_error"
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file_name": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "agreement_type": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "terms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "approve_agreement": {
+                      "type": "boolean"
+                    },
+                    "parent_agreement_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "file_name"
+                  ]
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/clause_categories": {
+        "get": {
+          "summary": "returns list of objects representing clause categories based on query parameters",
+          "tags": [
+            "Analyze Clause Categories"
+          ],
+          "parameters": [
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify agreement type name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify cursor from previous response to get next page of data",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful without params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "page_size": 100,
+                    "count": 3,
+                    "next_cursor": null,
+                    "clause_categories": [
+                      {
+                        "id": "4f77aac1-344c-4c91-878e-62361a0c17d2",
+                        "name": "abc",
+                        "created_at": "2023-12-13T10:41:53-05:00",
+                        "updated_at": "2023-12-13T10:41:53-05:00"
+                      },
+                      {
+                        "id": "a60a7149-004a-4c1c-a5a9-8c4e103ad824",
+                        "name": "def",
+                        "created_at": "2023-12-13T10:41:53-05:00",
+                        "updated_at": "2023-12-13T10:41:53-05:00"
+                      },
+                      {
+                        "id": "9beba8bd-f117-4d7f-a026-7bcdc252fbfe",
+                        "name": "ghi",
+                        "created_at": "2023-12-13T10:41:53-05:00",
+                        "updated_at": "2023-12-13T10:41:53-05:00"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "page_size": {
+                        "type": "integer",
+                        "description": "The number of results displayed",
+                        "example": 100
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "next_cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid",
+                        "description": "The string that must be passed to the cursor parameter to get the next page of results",
+                        "readOnly": true
+                      },
+                      "clause_categories": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the Clause Category",
+                              "example": "6afe43b0-7ee7-413c-ba6d-a64445aab1fc"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "Clause Category Name",
+                              "example": "Example Agreement Name"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "Created Date of Clause Category",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "Last Updated Date of Clause Category",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "created_at",
+                            "updated_at"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "page_size",
+                      "count",
+                      "next_cursor",
+                      "clause_categories"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "cursor is invalid",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "cursor is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/clauses": {
+        "get": {
+          "summary": "returns list of objects representing clauses based on query parameters",
+          "tags": [
+            "Analyze Clauses"
+          ],
+          "parameters": [
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify agreement type name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify cursor from previous response to get next page of data",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "description": "Specify page size of results, between 1 and 100",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "clause_category_id",
+              "in": "query",
+              "description": "Specify the clause category id to filter results",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful without params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "page_size": 100,
+                    "count": 3,
+                    "next_cursor": null,
+                    "clauses": [
+                      {
+                        "id": "26ee793c-99ce-11ee-953c-07ca2682528a",
+                        "name": "clause a",
+                        "text": "Beatae unde assumenda dolores.",
+                        "clause_category_id": "4bf198f0-01d9-4d33-b94b-b8247119506d",
+                        "note": "Tenetur et ducimus et.",
+                        "agreement_id": "26ecc344-99ce-11ee-953c-bb91f2304eb9",
+                        "created_at": "2023-12-13T10:41:59-05:00",
+                        "updated_at": "2023-12-13T10:41:59-05:00",
+                        "author_name": "Mariano Grimes"
+                      },
+                      {
+                        "id": "26f416e4-99ce-11ee-953c-b747a81ed074",
+                        "name": "clause b",
+                        "text": "Enim aperiam id adipisci.",
+                        "clause_category_id": "c0ac9008-f25c-4071-b933-48e43f435b40",
+                        "note": "Quo fugiat dolorum tempore.",
+                        "agreement_id": "26f2651a-99ce-11ee-953c-9f2f624b353d",
+                        "created_at": "2023-12-13T10:41:59-05:00",
+                        "updated_at": "2023-12-13T10:41:59-05:00",
+                        "author_name": "Stefany Morissette"
+                      },
+                      {
+                        "id": "26f9d426-99ce-11ee-953c-131b87632a27",
+                        "name": "clause c",
+                        "text": "Ipsum repudiandae fuga magni.",
+                        "clause_category_id": "4bf198f0-01d9-4d33-b94b-b8247119506d",
+                        "note": "Nesciunt explicabo accusantium minima.",
+                        "agreement_id": "26f81fd2-99ce-11ee-953c-3f61e07078e5",
+                        "created_at": "2023-12-13T10:41:59-05:00",
+                        "updated_at": "2023-12-13T10:41:59-05:00",
+                        "author_name": "Arnoldo Schultz"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "page_size": {
+                        "type": "integer",
+                        "description": "The number of results displayed",
+                        "example": 100
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "next_cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid",
+                        "description": "The string that must be passed to the cursor parameter to get the next page of results",
+                        "readOnly": true
+                      },
+                      "clause_categories": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the Clause",
+                              "example": "d0fbea72-c9c3-49ec-b6af-f8aa775d5e84"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "Clause Name",
+                              "example": "Example Clause Name"
+                            },
+                            "text": {
+                              "type": "string",
+                              "description": "Clause Text",
+                              "example": "lorem ipsum"
+                            },
+                            "clause_category_id": {
+                              "type": "string",
+                              "description": "UUID of the associated Clause Category",
+                              "example": "4d0af264-f9fa-4e38-ab7b-28015906fb27"
+                            },
+                            "note": {
+                              "type": "string",
+                              "description": "Note",
+                              "example": "Please adhere to this note."
+                            },
+                            "agreement_id": {
+                              "type": "string",
+                              "description": "UUID of the associated Agreement",
+                              "example": "e2dc7da6-a784-4ca6-99b4-b9c3d6cb42f5"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "Created Date of Clause",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "Last Updated Date of Clause",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            },
+                            "author_name": {
+                              "type": "string",
+                              "description": "Name of Author",
+                              "example": "John Doe"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "text",
+                            "clause_category_id",
+                            "note",
+                            "agreement_id",
+                            "created_at",
+                            "updated_at",
+                            "author_name"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "page_size",
+                      "count",
+                      "next_cursor",
+                      "clauses"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "cursor is invalid",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "cursor is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/agreement_types": {
+        "get": {
+          "summary": "returns list of objects representing the agreement types based on query parameters",
+          "tags": [
+            "Analyze Agreement Types"
+          ],
+          "parameters": [
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify agreement type name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify cursor from previous response to get next page of data",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful without params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "page_size": 100,
+                    "count": 3,
+                    "next_cursor": null,
+                    "agreement_types": [
+                      {
+                        "id": "29b847ec-99ce-11ee-953c-a3a4fe670fb3",
+                        "name": "Addendum",
+                        "is_smart": false
+                      },
+                      {
+                        "id": "29b691ea-99ce-11ee-953c-ef4a467f46a4",
+                        "name": "Master Agreement",
+                        "is_smart": false
+                      },
+                      {
+                        "id": "29b9fb1e-99ce-11ee-953c-33974a03f6a5",
+                        "name": "Service Agreement",
+                        "is_smart": false
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "page_size": {
+                        "type": "integer",
+                        "description": "The number of results displayed",
+                        "example": 100
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "next_cursor": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid",
+                        "description": "The string that must be passed to the cursor parameter to get the next page of results",
+                        "readOnly": true
+                      },
+                      "agreement_types": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the Agreement Type",
+                              "example": "ee800ea6-9afc-4920-9b51-81259640e147"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "Agreement Type Name",
+                              "example": "Example Clause Name"
+                            },
+                            "is_smart": {
+                              "type": "boolean",
+                              "description": "Boolean indicator of whether the agreement type is smart or not",
+                              "example": false
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "is_smart"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "page_size",
+                      "count",
+                      "next_cursor",
+                      "agreement_types"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "cursor is invalid",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "cursor is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/uploads/{id}": {
+        "get": {
+          "summary": "accepts an upload id from the response of an agreement upload request and returns status and agreement id",
+          "tags": [
+            "Analyze Uploads"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "upload_id": "2a6c593a-99ce-11ee-953c-4fb67116b994",
+                    "status": "success",
+                    "agreement_id": "2a69cd0a-99ce-11ee-953c-1336da670917",
+                    "updated_date": "2023-12-13T10:42:04.911-05:00",
+                    "message": null
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "upload_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUID of Upload",
+                        "example": "0d797b42-15f7-11ee-ae77-67008a40b00c"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "Status of the Upload",
+                        "example": "success"
+                      },
+                      "agreement_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUID of the related Agreement"
+                      },
+                      "updated_date": {
+                        "type": "string",
+                        "description": "Last Updated Date of the Upload",
+                        "example": "2022-10-23"
+                      },
+                      "message": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Additional information about the Upload status",
+                        "example": "2021-09-23"
+                      }
+                    },
+                    "required": [
+                      "upload_id",
+                      "status",
+                      "agreement_id",
+                      "updated_date",
+                      "message"
+                    ]
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No record found for id",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Record Not Found",
+                    "error_code": "not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "invalid id format",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "id is in invalid format",
+                    "error_code": "unknown_error"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v1/me": {
+        "get": {
+          "summary": "returns information about the current user",
+          "tags": [
+            "Analyze System"
+          ],
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "successful",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "whoami": "loyce.koepp@corkery.test",
+                    "status": "up",
+                    "timestamp": "2023-12-13T15:42:06Z"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/agreements/{id}": {
+        "patch": {
+          "summary": "updates an agreement",
+          "tags": [
+            "Analyze Agreements"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful with params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": {
+                      "id": "2d495824-99ce-11ee-953c-07308e7104e1",
+                      "parent_agreement_id": "2d45d88e-99ce-11ee-953c-4b8116e9a140",
+                      "name": "Updated Agreement Name",
+                      "original_name": "original 1",
+                      "updated_date": "2023-12-13T15:42:09Z",
+                      "upload_date": "2023-12-13T15:42:09Z",
+                      "uploaded_by": "Chad Doyle",
+                      "type_id": "2d3f7462-99ce-11ee-953c-fbd3b6cf8efa",
+                      "tag_ids": [
+                        "2d41bde4-99ce-11ee-953c-53232862003a",
+                        "2d420902-99ce-11ee-953c-cbc87c3865f6"
+                      ],
+                      "term_ids": [
+                        "2d4b232a-99ce-11ee-953c-5f22a88f70f5",
+                        "2d4c886e-99ce-11ee-953c-1b9519f79f17"
+                      ],
+                      "child_agreements": [
+                        {
+                          "id": "2d589104-99ce-11ee-953c-d7684ec72320"
+                        }
+                      ]
+                    }
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "parent agreement id not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Parent agreement not found: 292986df-e0af-43fb-a031-c9cdd4af176a",
+                    "error_code": "parent_agreement_not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "validation failure on value",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "type_id",
+                        "error_code": "validation_failure",
+                        "message": "type_id must be a string"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "parent_agreement_id": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/agreements/{id}/download": {
+        "get": {
+          "summary": "returns agreement file url",
+          "tags": [
+            "Analyze Agreements"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "use_original_name",
+              "in": "query",
+              "schema": {
+                "type": "boolean"
+              },
+              "required": false,
+              "description": "A filter used to return original file or renamed with a smart_name",
+              "example": "`?use_original_name=true`"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful with params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": {
+                      "url": "memory://033ca382aa8c9b54b88876a729eaddc0/real.pdf"
+                    }
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "failure when user does not have an access",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Access Denied for User",
+                    "error_code": "unauthorized_user"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "failure with agreement not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Not Found",
+                    "error_code": "agreement_not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "validation failure on value",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "use_original_name",
+                        "error_code": "validation_failure",
+                        "message": "use_original_name must be boolean"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/agreements/{id}/terms/{term_id}": {
+        "patch": {
+          "summary": "updates a term",
+          "tags": [
+            "Analyze Agreement Terms"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "term_id",
+              "in": "path",
+              "description": "term id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful without params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": {
+                      "id": "2bdb1c66-99ce-11ee-953c-5f673cc3ad6c",
+                      "name": "generic term abc",
+                      "value": "text example",
+                      "kind": "text",
+                      "status": "User-Defined"
+                    }
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "name",
+                          "kind",
+                          "status"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "integer"
+                              }
+                            ]
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "failure with term not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Term not found: f94f11dd-8a6f-4314-b7c7-4b0c86901be2",
+                    "error_code": "term_not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "validation failure on value",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "value",
+                        "error_code": "validation_failure",
+                        "message": "value must be boolean"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/agreements/{id}/notes": {
+        "post": {
+          "summary": "returns created notes",
+          "tags": [
+            "Analyze Agreements"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful with valid params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": [
+                      {
+                        "id": "33d6d7d4-99ce-11ee-953c-53c983b0d214",
+                        "content": "Hi",
+                        "user_id": "33bff64a-99ce-11ee-953c-b78b255ff632",
+                        "agreement_id": "33c8e12e-99ce-11ee-953c-bbfc0b94ad2c",
+                        "created_at": "2023-12-13T10:42:20.708-05:00"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "content"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "note id"
+                            },
+                            "content": {
+                              "type": "string",
+                              "description": "notes content"
+                            },
+                            "user_id": {
+                              "type": "string",
+                              "description": "user id"
+                            },
+                            "agreement_id": {
+                              "type": "string",
+                              "description": "agreement id"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "when it was created"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "failure when user does not have an access",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Access Denied for User",
+                    "error_code": "unauthorized_user"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "failure when agreement not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Not Found",
+                    "error_code": "agreement_or_user_not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "validation failure when there is no content",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "data",
+                        "error_code": "validation_failure",
+                        "message": "data [1, {:content=>[\"must be filled\"]}]"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "content": {
+                            "type": "string"
+                          },
+                          "user_email": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "content"
+                  ]
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/agreements/{id}/tags/{tag_id}": {
+        "post": {
+          "summary": "adds a tag to the agreement",
+          "tags": [
+            "Analyze Agreement Tags"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "tag_id",
+              "in": "path",
+              "description": "tag id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "successfully created with valid params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": {
+                      "name": "rerum1",
+                      "color": "blue",
+                      "id": "34ae0e5c-99ce-11ee-953c-73dc36c0134f"
+                    }
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "failure when user does not have an access",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Access Denied for User",
+                    "error_code": "unauthorized_user"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "failure when tag not found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Not Found",
+                    "error_code": "tag_not_found"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "validation failure when wrong params format",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "id",
+                        "error_code": "validation_failure",
+                        "message": "id is in invalid format"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        },
+        "delete": {
+          "summary": "remove tag from agreement",
+          "tags": [
+            "Analyze Agreement Tags"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "agreement id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "tag_id",
+              "in": "path",
+              "description": "tag id",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "The resource was deleted successfully."
+            },
+            "403": {
+              "description": "failure when user does not have an access",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Access Denied for User",
+                    "error_code": "unauthorized_user"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "failure when tag does not belong to agreement",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Tag does not belong to the agreement",
+                    "error_code": "no_such_tag_in_agreement"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "failure validation when pass wrong params format",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "id",
+                        "error_code": "validation_failure",
+                        "message": "id is in invalid format"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/tags": {
+        "get": {
+          "summary": "gets a list of company tags",
+          "tags": [
+            "Analyze Tags"
+          ],
+          "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify tag name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Specify uuid of the last tag form the collection for pagination",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "successful with pagination",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": [
+                      {
+                        "id": "379b3888-99ce-11ee-953c-ff18475c03e8",
+                        "name": "blue tag",
+                        "color": "blue",
+                        "agreements_count": 0
+                      }
+                    ],
+                    "total_count": 3,
+                    "_links": {
+                      "next": {
+                        "href": "http://www.example.com/api/analyze/v2/tags?cursor=379b3888-99ce-11ee-953c-ff18475c03e8&limit=1"
+                      }
+                    }
+                  },
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "next": {
+                        "type": "object",
+                        "properties": {
+                          "href": {
+                            "type": "string",
+                            "description": "URL to the next page of items (null if none)",
+                            "example": "https://api.linksquares.com/api/finalize/v2/tags?cursor=0bbb5bb8-4036-11ee-82e0-9b1bc927e249"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "limit does not have a valid value",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "limit",
+                        "error_code": "validation_failure",
+                        "message": "limit must be an integer"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        },
+        "post": {
+          "summary": "create company tags",
+          "tags": [
+            "Analyze Tags"
+          ],
+          "parameters": [],
+          "responses": {
+            "201": {
+              "description": "successfully created with valid params",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "data": {
+                      "id": null,
+                      "name": "rem",
+                      "color": "smart_green",
+                      "agreements_count": 0,
+                      "created_at": null
+                    }
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "duplicate name passed",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Tag has already been created.",
+                    "error_code": "tag_exists"
+                  }
+                }
+              }
+            }
+          },
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "color": {
+                          "type": "string",
+                          "enum": [
+                            "blue",
+                            "green",
+                            "red",
+                            "purple",
+                            "dark_blue",
+                            "smart_green",
+                            "aqua",
+                            "orange",
+                            "yellow",
+                            "light_gray",
+                            "medium_gray",
+                            "dark_gray",
+                            "evergreen",
+                            "brown",
+                            "sky_blue",
+                            "pink",
+                            "slate"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "name"
+                  ]
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/tags/{id}": {
+        "delete": {
+          "summary": "delete company tag",
+          "tags": [
+            "Analyze Tags"
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "The id of the company tag to be deleted",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "successfully"
+            },
+            "403": {
+              "description": "unauthorized user - read only",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Access Denied for User",
+                    "error_code": "unauthorized_user"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "tag not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Tag does not exist.",
+                    "error_code": "tag_not_found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "405": {
+              "description": "not allowed",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Tag has associated role, role must first be disassociated.",
+                    "error_code": "tag_has_associated_role"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "410": {
+              "description": "resource gone",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Tag was previously deleted.",
+                    "error_code": "tag_previously_deleted"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "fails validation",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "tag_id",
+                        "error_code": "validation_failure",
+                        "message": "tag_id is in invalid format"
+                      }
+                    ]
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/term_types": {
+        "get": {
+          "summary": "gets a list of term types",
+          "tags": [
+            "Analyze Term Types"
+          ],
+          "parameters": [
+            {
+              "name": "page_size",
+              "in": "query",
+              "required": false,
+              "description": "Specify page size of results, between 1 and 100",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "name",
+              "in": "query",
+              "description": "Specify term type name to filter results [Case Sensitive]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "sort_by",
+              "in": "query",
+              "description": "Specify the field to sort by [name]. Prepend `-` for descending [-name]",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "include",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Specify the documents to include [embedded]",
+              "required": false
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "success with embedded documents",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "total_count": {
+                        "type": "integer",
+                        "description": "Total number of results found",
+                        "example": 100
+                      },
+                      "data": {
+                        "type": "array",
+                        "nullable": true,
+                        "minItems": 0,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "UUID of the Term Type",
+                              "example": "6b77faf5-a5d3-454b-9d81-b8f7de9d8c14"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "Term Type Name",
+                              "readOnly": true,
+                              "example": "Effective Date"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "description": "Kind of Term Type",
+                              "example": "date"
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "Last Updated Date of Agreement",
+                              "example": "2023-06-27T14:27:11.022-04:00"
+                            },
+                            "agreement_type_id": {
+                              "type": "string",
+                              "nullable": true,
+                              "format": "uuid",
+                              "description": "UUID of the associated Agreement Type",
+                              "example": "4ba235de-d801-4932-8dc1-68ce78c642b4"
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "kind",
+                          "created_at",
+                          "agreement_type_id"
+                        ]
+                      },
+                      "_embedded": {
+                        "type": "object",
+                        "nullable": true,
+                        "minItems": 0,
+                        "properties": {
+                          "agreement_types": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "ID of Agreement Type",
+                                  "example": "0d797b42-15f7-11ee-ae77-67008a40b00c"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "description": "Name of Agreement Type",
+                                  "example": "Master Agreement"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "agreement_types"
+                        ]
+                      },
+                      "_links": {
+                        "type": "object",
+                        "properties": {
+                          "next": {
+                            "type": "object",
+                            "properties": {
+                              "href": {
+                                "type": "string",
+                                "description": "URL to the next page of items (null if none)",
+                                "example": "https://api.linksquares.com/api/finalize/v2/agreements?page=3&per_page=100"
+                              }
+                            }
+                          },
+                          "prev": {
+                            "type": "object",
+                            "properties": {
+                              "href": {
+                                "type": "string",
+                                "description": "URL to the previous page of items (null if none)",
+                                "example": "https://api.linksquares.com/api/analyze/v2/agreements?page=1&per_page=100"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "data",
+                      "total_count"
+                    ]
+                  },
+                  "example": {
+                    "data": [
+                      {
+                        "id": "38d41c9c-99ce-11ee-953c-2b9dcdb8a443",
+                        "name": "generic term def",
+                        "kind": "checkbox",
+                        "created_at": "2023-12-13T15:42:29Z",
+                        "agreement_type_id": "38cfd150-99ce-11ee-953c-27377e281e0c"
+                      },
+                      {
+                        "id": "38d3d6d8-99ce-11ee-953c-e7d0587a09ea",
+                        "name": "generic term cde",
+                        "kind": "string",
+                        "created_at": "2023-12-13T15:42:29Z",
+                        "agreement_type_id": null
+                      }
+                    ],
+                    "total_count": 4,
+                    "_links": {
+                      "next": {
+                        "href": "http://www.example.com/api/analyze/v2/term_types?include=embedded&page=2&page_size=2&sort_by=-name"
+                      }
+                    },
+                    "_embedded": {
+                      "agreement_types": [
+                        {
+                          "id": "38cfd150-99ce-11ee-953c-27377e281e0c",
+                          "name": "Custom Template"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "inactive user",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "User is not active",
+                    "error_code": "forbidden"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "page_size does not have a valid value",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message",
+                      "error_code"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      },
+                      "error_code": {
+                        "type": "string"
+                      },
+                      "errors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "field_name": {
+                              "type": "string"
+                            },
+                            "error_code": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Validation Failed",
+                    "error_code": "validation_failure",
+                    "errors": [
+                      {
+                        "field_name": "page_size",
+                        "error_code": "must_be_int",
+                        "message": "page_size must be an integer"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      },
+      "/analyze/v2/agreements/{id}/attachments/{attachment_id}": {
+        "delete": {
+          "summary": "delete agreement attachment",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "agreement id",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "attachment_id",
+              "in": "path",
+              "required": true,
+              "description": "agreement attachment id",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Agreement attachment deleted successfully"
+            },
+            "400": {
+              "description": "Agreement attachment cannot be deleted",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Failed to Delete Agreement Attachment"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Agreement attachment not found",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Agreement Attachment Not Found"
+                  },
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "message"
+                    ],
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "ApiKeyAuth": []
+            }
+          ]
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "AnalyzeAgreement": {
+          "type": "object",
+          "required": [
+            "id",
+            "original_name",
+            "name",
+            "type",
+            "terms",
+            "tags",
+            "uploaded_by",
+            "upload_date",
+            "updated_date",
+            "parent_agreement_id",
+            "finalize_agreement_id",
+            "child_agreements"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "id"
+            },
+            "original_name": {
+              "type": "string",
+              "description": "original file name"
+            },
+            "name": {
+              "type": "string",
+              "description": "agreement name"
+            },
+            "type": {
+              "type": "object",
+              "description": "agreement type",
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "type id"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "type name"
+                }
+              }
+            },
+            "terms": {
+              "type": "array",
+              "description": "agreement terms",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "description": "value"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "term type name"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "status"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "description": "term type kind"
+                  }
+                }
+              }
+            },
+            "tags": {
+              "type": "array",
+              "description": "tags",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "name"
+                  }
+                }
+              }
+            },
+            "uploaded_by": {
+              "type": "string",
+              "description": "full name of uploading user"
+            },
+            "upload_date": {
+              "type": "string",
+              "description": "uploaded date"
+            },
+            "updated_date": {
+              "type": "string",
+              "description": "updated date"
+            },
+            "parent_agreement_id": {
+              "type": "string",
+              "description": "parent agreement id"
+            },
+            "finalize_agreement_id": {
+              "type": "string",
+              "description": "finalize agreement id"
+            },
+            "child_agreements": {
+              "type": "array",
+              "description": "child agreements",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "child agreement id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "AnalyzeAgreementHierarchy": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Agreement Name (Parent)",
+              "example": "Example Master Agreement"
+            },
+            "effective_date": {
+              "type": "string",
+              "nullable": true,
+              "description": "Effective Date of Agreement",
+              "example": "2021-09-23"
+            },
+            "agreement_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the Agreement"
+            },
+            "upload_date": {
+              "type": "string",
+              "description": "Upload Date of the Agreement",
+              "example": "2022-10-23"
+            },
+            "children": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the Child Agreement",
+                    "example": "Example Child Agreement Name"
+                  },
+                  "effective_date": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Effective Date of Child Agreement",
+                    "example": "2020-04-23"
+                  },
+                  "agreement_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID of the Child Agreement"
+                  },
+                  "upload_date": {
+                    "type": "string",
+                    "description": "Upload Date of the Child Agreement",
+                    "example": "2022-03-23"
+                  },
+                  "children": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Name of the Grandchild Agreement",
+                          "example": "Example Child Agreement Name"
+                        },
+                        "effective_date": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Effective Date of Grandchild Agreement",
+                          "example": "2021-01-23"
+                        },
+                        "agreement_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "UUID of the Grandchild Agreement"
+                        },
+                        "upload_date": {
+                          "type": "string",
+                          "description": "Upload Date of the Grandchild Agreement",
+                          "example": "2022-12-23"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "name",
+            "effective_date",
+            "agreement_id",
+            "upload_date",
+            "children"
+          ]
+        },
+        "AnalyzeAgreementTag": {
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "AnalyzeAgreementTerm": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "kind",
+            "status"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        },
+        "AnalyzeCreateAgreement": {
+          "type": "object",
+          "properties": {
+            "upload_id": {
+              "type": "string",
+              "description": "UUID of the Upload",
+              "example": "44d2f7a9-b21f-49d9-b6c3-4b927dda178b"
+            },
+            "name": {
+              "type": "string",
+              "description": "The custom name of the document being uploaded",
+              "example": "Example Agreement Name"
+            },
+            "type": {
+              "type": "string",
+              "description": "The Agreement Type of the Upload",
+              "example": "Master Agreement"
+            },
+            "file_name": {
+              "type": "string",
+              "description": "The name of the file being uploaded",
+              "example": "example_agreement_name.pdf"
+            },
+            "status": {
+              "type": "string",
+              "description": "Status of the Upload",
+              "example": "Initialized"
+            },
+            "url": {
+              "type": "string",
+              "description": "AWS Presigned Upload URL",
+              "example": "https://linksquares-agreement-api-upload-test.s3.amazonaws.com/3f4f51c8-15d9-11ee-8c7f-1f7f5cacceef/4037a5e0-15d9-11ee-8c7f-9ffe3bde9219/new%20file%20name.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIARONR2CMFGDRHHB3F%2F20230628%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230628T172852Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Security-Token=unused-test-session-key&X-Amz-Signature=2d3739f49a682547d1f52c3ab0b32709ec39df9954b8a05e1abb2588414276cf"
+            },
+            "parent_agreement_id": {
+              "type": "string",
+              "nullable": true,
+              "description": "UUID of the Parent Agreement",
+              "example": "b4da80a6-9277-4d78-8d3a-f67336624fa9"
+            },
+            "tags": {
+              "type": "array",
+              "nullable": true,
+              "minItems": 0,
+              "items": {
+                "type": "string",
+                "description": "Tag Name"
+              }
+            },
+            "terms": {
+              "type": "array",
+              "nullable": true,
+              "minItems": 0,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the term",
+                    "example": "Effective Date"
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "The value of the term",
+                    "example": "2022-12-25",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "upload_id",
+            "name",
+            "file_name",
+            "type",
+            "status",
+            "url",
+            "tags",
+            "terms",
+            "parent_agreement_id"
+          ]
+        },
+        "AnalyzeCreateAgreementAttachment": {
+          "type": "object",
+          "required": [
+            "attachment_upload_url"
+          ],
+          "properties": {
+            "attachment_upload_url": {
+              "type": "string"
+            }
+          }
+        },
+        "AnalyzeAgreementType": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "is_smart"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "is_smart": {
+              "type": "boolean"
+            }
+          }
+        },
+        "AnalyzeClause": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "text",
+            "clause_category_id",
+            "note",
+            "agreement_id",
+            "author_name",
+            "created_at",
+            "updated_at"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "clause_category_id": {
+              "type": "string"
+            },
+            "note": {
+              "type": "string"
+            },
+            "agreement_id": {
+              "type": "string"
+            },
+            "author_name": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "updated_at": {
+              "type": "string"
+            }
+          }
+        },
+        "AnalyzeClauseCategory": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "created_at",
+            "updated_at"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "updated_at": {
+              "type": "string"
+            }
+          }
+        },
+        "AnalyzeUpload": {
+          "type": "object",
+          "properties": {
+            "upload_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of Upload",
+              "example": "0d797b42-15f7-11ee-ae77-67008a40b00c"
+            },
+            "status": {
+              "type": "string",
+              "description": "Status of the Upload",
+              "example": "success"
+            },
+            "agreement_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the related Agreement"
+            },
+            "updated_date": {
+              "type": "string",
+              "description": "Last Updated Date of the Upload",
+              "example": "2022-10-23"
+            },
+            "message": {
+              "type": "string",
+              "nullable": true,
+              "description": "Additional information about the Upload status",
+              "example": "2021-09-23"
+            }
+          },
+          "required": [
+            "upload_id",
+            "status",
+            "agreement_id",
+            "updated_date",
+            "message"
+          ]
+        }
+      },
+      "securitySchemes": {
+        "ApiKeyAuth": {
+          "type": "apiKey",
+          "name": "x-api-key",
+          "in": "header"
+        }
+      }
+    }
+  }

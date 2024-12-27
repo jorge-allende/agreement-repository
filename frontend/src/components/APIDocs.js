@@ -2,12 +2,12 @@ import React from "react";
 
 const APIDocs = () => {
   return (
-    <div>
-      <h2>API Documentation</h2>
+    <div style={{ backgroundColor: "white", minHeight: "100vh", padding: "20px" }}>
+      <h2>API Testing</h2>
       <iframe
-        src="http://localhost:8000/docs"
+        src="http://localhost:8000/api-testing"
         style={{ width: "100%", height: "80vh", border: "none" }}
-        title="API Documentation"
+        title="API Testing"
       ></iframe>
     </div>
   );
