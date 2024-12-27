@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from app.routers.linksquares import router as linksquares_router
+from app.routers.auth import router as auth_router  # Import the auth router
 from config import API_KEY  # Centralized configuration for API keys and environment variables
 
 # Ensure API key is loaded
@@ -39,8 +40,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include only relevant routers
+# Include routers
 app.include_router(linksquares_router, prefix="/analyze/v1", tags=["LinkSquares"])
+app.include_router(auth_router, prefix="", tags=["Authentication"])  # Add the auth router
 
 # Add a custom Swagger UI endpoint
 @app.get("/api-testing", include_in_schema=False)
