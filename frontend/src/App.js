@@ -11,7 +11,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/docs" element={<APIDocs />} />
+        <Route path="/api-testing" element={<APIDocs />} />
       </Routes>
     </Router>
   );

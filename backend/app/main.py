@@ -1,26 +1,56 @@
+import os
+import json
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import hello, auth  # Import the auth router
-from app.exceptions import add_exception_handlers
+from fastapi.openapi.docs import get_swagger_ui_html
+from app.routers.linksquares import router as linksquares_router
+from config import API_KEY  # Centralized configuration for API keys and environment variables
+
+# Ensure API key is loaded
+if not API_KEY:
+    raise RuntimeError("API key is missing. Please check your .env file.")
+
+# Load the custom OpenAPI JSON
+def custom_openapi():
+    try:
+        with open("backend/static/openapi.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise RuntimeError("OpenAPI JSON file not found. Ensure 'backend/static/openapi.json' exists.")
 
 app = FastAPI()
+
+# Set custom OpenAPI schema
+app.openapi = custom_openapi
+
+# Use the absolute path to serve static files
+static_dir = os.path.join(os.path.dirname(__file__), "../static")
+if not os.path.exists(static_dir):
+    raise RuntimeError(f"Static directory not found: {static_dir}")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Allow React frontend
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all HTTP headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-add_exception_handlers(app)  # Add global exception handler
+# Include only relevant routers
+app.include_router(linksquares_router, prefix="/analyze/v1", tags=["LinkSquares"])
 
-# Include routers
-app.include_router(hello.router, tags=["Hello"])  # Include the "hello" router
-app.include_router(auth.router, tags=["Authentication"])  # Include the "auth" router
+# Add a custom Swagger UI endpoint
+@app.get("/api-testing", include_in_schema=False)
+async def custom_swagger_ui():
+    return get_swagger_ui_html(
+        openapi_url="/static/openapi.json",  # Path to your OpenAPI JSON file
+        title="API Testing",
+    )
 
-@app.get("/", tags=["Root"])
+@app.get("/")
 async def read_root():
     return {"message": "Welcome to the Agreement Repository API"}
 
